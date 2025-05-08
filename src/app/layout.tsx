@@ -1,6 +1,7 @@
 import "@/styles/globals.css"
 
 import type { Metadata } from "next"
+import Link from "next/link"
 
 import { ThemeProvider } from "@/components/theme-provider"
 import { Button } from "@/components/ui/button"
@@ -29,44 +30,44 @@ export default function RootLayout({
               <aside className="w-56 bg-muted border-r border-border flex flex-col py-4 px-2">
                 <nav className="flex flex-col gap-1">
                   <Button asChild variant="ghost" className="justify-start">
-                    <a href="#">
+                    <Link href="/products">
                       <span role="img" aria-label="products">
                         🥑
                       </span>{" "}
                       Products
-                    </a>
+                    </Link>
                   </Button>
                   <Button asChild variant="ghost" className="justify-start">
-                    <a href="#">
+                    <Link href="/recipes">
                       <span role="img" aria-label="recipes">
                         📚
                       </span>{" "}
                       Recipes
-                    </a>
+                    </Link>
                   </Button>
                   <Button asChild variant="ghost" className="justify-start">
-                    <a href="#">
-                      <span role="img" aria-label="recipes">
+                    <Link href="/menu">
+                      <span role="img" aria-label="menu">
                         📜
                       </span>{" "}
                       Menu
-                    </a>
+                    </Link>
                   </Button>
                   <Button asChild variant="ghost" className="justify-start">
-                    <a href="#">
-                      <span role="img" aria-label="recipes">
+                    <Link href="/vendors">
+                      <span role="img" aria-label="vendors">
                         🚚
                       </span>{" "}
                       Vendors
-                    </a>
+                    </Link>
                   </Button>
                   <Button asChild variant="ghost" className="justify-start">
-                    <a href="#">
-                      <span role="img" aria-label="recipes">
+                    <Link href="/sales">
+                      <span role="img" aria-label="sales">
                         📊
                       </span>{" "}
                       Sales
-                    </a>
+                    </Link>
                   </Button>
                 </nav>
               </aside>

@@ -1,10 +1,6 @@
-import { Button } from "@/components/ui/button"
+import { redirect } from "next/navigation"
 
 export default function Home() {
-  return (
-    <main>
-      <h1>Welcome to Foccibase</h1>
-      <Button>Click me</Button>
-    </main>
-  )
+  redirect("/products")
+  return null
 }
