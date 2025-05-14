@@ -8,6 +8,7 @@ import {
   type ProductCategory,
 } from "@/server/get-product-categories"
 import { getProducts, type Product } from "@/server/get-products"
+import { supabase } from "@/server/supabase-client"
 
 import { AddProductInput } from "./components/add-product-input"
 import { CategoryTitle } from "./components/category-title"
@@ -30,12 +31,43 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Initial fetch
     Promise.all([getProducts(), getProductCategories()])
       .then(([products, categories]) => {
         setProducts(products)
         setCategories(categories)
       })
       .finally(() => setLoading(false))
+
+    // Subscribe to products changes
+    const productsChannel = supabase
+      .channel("public:products")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "products" },
+        () => {
+          getProducts().then(setProducts)
+        },
+      )
+      .subscribe()
+
+    // Subscribe to categories changes
+    const categoriesChannel = supabase
+      .channel("public:product_categories")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "product_categories" },
+        () => {
+          getProductCategories().then(setCategories)
+        },
+      )
+      .subscribe()
+
+    // Cleanup on unmount
+    return () => {
+      supabase.removeChannel(productsChannel)
+      supabase.removeChannel(categoriesChannel)
+    }
   }, [])
 
   const categoryMap = categories.map((category) => ({
@@ -43,19 +75,46 @@ export default function ProductsPage() {
     products: products.filter((product) => product.category_id === category.id),
   }))
 
-  const handleAddProduct = (catId: string) => {
+  const handleAddProduct = async (catId: string) => {
+    // Instantly hides the input
+    setShowInput({ ...showInput, [catId]: false })
+
     const productName = newProducts[catId]?.trim()
     if (productName) {
-      const newProduct: Product = {
-        id: Date.now().toString(), // TODO: change this
+      const tempId = `temp-${Date.now()}`
+      const optimisticProduct = {
+        id: tempId, // Temporary ID to avoid React key issues
         name: productName,
         category_id: catId,
       } as Product
 
-      setProducts((prev) => [...prev, newProduct])
+      setProducts((prev) => [...prev, optimisticProduct])
+
+      // Insert the new product into the database
+      const { data, error } = await supabase
+        .from("products")
+        .insert([
+          {
+            name: productName,
+            category_id: catId,
+          },
+        ])
+        .select() // Inserts row with real ID
+
+      // Remove the optimistic product and add the real one if insert succeeded
+      if (!error && data && data.length > 0) {
+        setProducts((prev) =>
+          prev.filter((p) => p.id !== tempId).concat(data[0]),
+        )
+      } else if (error) {
+        // Remove the optimistic product if error occurs
+        setProducts((prev) => prev.filter((p) => p.id !== tempId))
+        // TODO: handle error for already existing name
+        console.error("Failed to add product:", error)
+      }
+      // Clears the input
       setNewProducts({ ...newProducts, [catId]: "" })
     }
-    setShowInput({ ...showInput, [catId]: false })
   }
 
   const onPlusclick = (category: CategoryMap) => {
