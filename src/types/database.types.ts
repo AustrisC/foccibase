@@ -32,33 +32,33 @@ export type Database = {
           category_id: string
           id: string
           name: string
-          package_price: number
-          package_weight_kg: number
+          package_price: number | null
+          package_weight_kg: number | null
           shelf_life_days: number | null
           storage_temperature: number | null
-          supplier_id: string
+          supplier_id: string | null
           url: string | null
         }
         Insert: {
           category_id: string
           id?: string
           name: string
-          package_price: number
-          package_weight_kg: number
+          package_price?: number | null
+          package_weight_kg?: number | null
           shelf_life_days?: number | null
           storage_temperature?: number | null
-          supplier_id: string
+          supplier_id?: string | null
           url?: string | null
         }
         Update: {
           category_id?: string
           id?: string
           name?: string
-          package_price?: number
-          package_weight_kg?: number
+          package_price?: number | null
+          package_weight_kg?: number | null
           shelf_life_days?: number | null
           storage_temperature?: number | null
-          supplier_id?: string
+          supplier_id?: string | null
           url?: string | null
         }
         Relationships: [
