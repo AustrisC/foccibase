@@ -1,128 +1,103 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import {
+  getProductCategories,
+  type ProductCategory,
+} from "@/server/get-product-categories"
+import { getProducts, type Product } from "@/server/get-products"
 
+import { AddProductInput } from "./components/add-product-input"
 import { CategoryTitle } from "./components/category-title"
+import { ProductsSkeleton } from "./components/products-skeleton"
 
-type Category = {
-  id: string
-  name: string
-  products: string[]
+interface CategoryMap extends ProductCategory {
+  products: Product[]
 }
 
 export default function ProductsPage() {
-  const [categories, setCategories] = useState<Category[]>([
-    {
-      id: "essentials",
-      name: "Essentials",
-      products: ["Flour", "Water", "Yeast"],
-    },
-    {
-      id: "vegetables",
-      name: "Vegetables",
-      products: ["Onions", "Red Peppers", "Basil"],
-    },
-  ])
+  // From database
+  const [categories, setCategories] = useState<ProductCategory[]>([])
+  const [products, setProducts] = useState<Product[]>([])
 
-  const [newCategory, setNewCategory] = useState("")
+  // Local state
   const [newProducts, setNewProducts] = useState<{ [key: string]: string }>({})
-  const [showInput, setShowInput] = useState<{ [key: string]: boolean }>({})
 
-  const handleAddCategory = () => {
-    if (newCategory.trim()) {
-      setCategories([
-        ...categories,
-        { id: Date.now().toString(), name: newCategory, products: [] },
-      ])
-      setNewCategory("")
-    }
-  }
+  // Loaders, booleans
+  const [showInput, setShowInput] = useState<{ [key: string]: boolean }>({})
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    Promise.all([getProducts(), getProductCategories()])
+      .then(([products, categories]) => {
+        setProducts(products)
+        setCategories(categories)
+      })
+      .finally(() => setLoading(false))
+  }, [])
+
+  const categoryMap = categories.map((category) => ({
+    ...category,
+    products: products.filter((product) => product.category_id === category.id),
+  }))
 
   const handleAddProduct = (catId: string) => {
-    const product = newProducts[catId]?.trim()
-    if (product) {
-      setCategories((categories) =>
-        categories.map((cat) =>
-          cat.id === catId
-            ? { ...cat, products: [...cat.products, product] }
-            : cat,
-        ),
-      )
+    const productName = newProducts[catId]?.trim()
+    if (productName) {
+      const newProduct: Product = {
+        id: Date.now().toString(), // TODO: change this
+        name: productName,
+        category_id: catId,
+      } as Product
+
+      setProducts((prev) => [...prev, newProduct])
       setNewProducts({ ...newProducts, [catId]: "" })
     }
-
     setShowInput({ ...showInput, [catId]: false })
   }
 
-  const onPlusclick = (category: Category) => {
+  const onPlusclick = (category: CategoryMap) => {
     setShowInput((prev) => ({
       ...prev,
       [category.id]: true,
     }))
   }
 
+  if (loading) {
+    return <ProductsSkeleton count={3} />
+  }
+
   return (
     <div className="flex flex-wrap gap-8">
-      {categories.map((category) => (
+      {categoryMap.map((category) => (
         <div key={category.id} className="min-w-[320px] flex-1">
           <CategoryTitle
             name={category.name}
             onPlusClick={() => onPlusclick(category)}
           />
           <div className="flex flex-col gap-1.5 mb-2">
-            {category.products.map((product, index) => (
-              <Button key={index} variant="secondary" size="sm">
-                {product}
+            {category.products.map((product) => (
+              <Button key={product.id} variant="secondary" size="sm">
+                {product.name}
               </Button>
             ))}
           </div>
           {showInput[category.id] && (
-            <div className="flex gap-2 mb-2">
-              <Input
-                className="flex-1"
-                type="text"
-                placeholder="Add product"
-                value={newProducts[category.id] || ""}
-                onChange={(e) =>
-                  setNewProducts({
-                    ...newProducts,
-                    [category.id]: e.target.value,
-                  })
-                }
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleAddProduct(category.id)
-                }}
-                onBlur={() => handleAddProduct(category.id)}
-                autoFocus
-              />
-            </div>
+            <AddProductInput
+              value={newProducts[category.id] || ""}
+              onChange={(val) =>
+                setNewProducts({
+                  ...newProducts,
+                  [category.id]: val,
+                })
+              }
+              onAdd={() => handleAddProduct(category.id)}
+            />
           )}
         </div>
       ))}
-      <div className="min-w-[320px] flex-1">
-        <h2 className="text-2xl mb-4">Add Category</h2>
-        <div className="flex gap-2">
-          <Input
-            className="flex-1"
-            type="text"
-            placeholder="Category name"
-            value={newCategory}
-            onChange={(e) => setNewCategory(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleAddCategory()
-            }}
-          />
-          <button
-            className="rounded bg-primary text-primary-foreground px-3 py-1"
-            onClick={handleAddCategory}
-          >
-            Add
-          </button>
-        </div>
-      </div>
     </div>
   )
 }
