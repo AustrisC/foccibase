@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import { postgresErrorHandler } from "@/lib/error-handler"
 import {
   getProductCategories,
   type ProductCategory,
@@ -109,9 +110,9 @@ export default function ProductsPage() {
       } else if (error) {
         // Remove the optimistic product if error occurs
         setProducts((prev) => prev.filter((p) => p.id !== tempId))
-        // TODO: handle error for already existing name
-        console.error("Failed to add product:", error)
+        postgresErrorHandler(error, "product")
       }
+
       // Clears the input
       setNewProducts({ ...newProducts, [catId]: "" })
     }

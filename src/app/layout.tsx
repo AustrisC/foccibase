@@ -5,6 +5,7 @@ import type { Metadata } from "next"
 import { AppSidebar } from "@/components/app-sidebar"
 import { ThemeProvider } from "@/components/theme-provider"
 import { SidebarProvider } from "@/components/ui/sidebar"
+import { Toaster } from "@/components/ui/sonner"
 
 export const metadata: Metadata = {
   title: "Foccibase",
@@ -32,6 +33,7 @@ export default function RootLayout({
               <div className="px-7 py-5">{children}</div>
             </main>
           </SidebarProvider>
+          <Toaster richColors={true} />
         </ThemeProvider>
       </body>
     </html>
