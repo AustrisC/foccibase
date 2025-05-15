@@ -13,6 +13,7 @@ import { supabase } from "@/server/supabase-client"
 
 import { AddProductInput } from "./components/add-product-input"
 import { CategoryTitle } from "./components/category-title"
+import { ProductPopover } from "./components/product-popover"
 import { ProductsSkeleton } from "./components/products-skeleton"
 
 interface CategoryMap extends ProductCategory {
@@ -125,6 +126,26 @@ export default function ProductsPage() {
     }))
   }
 
+  const onProductKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    categoryId: string,
+  ) => {
+    // Hides the input if esc button is pressed and product field is empty
+    if (
+      e.key === "Escape" &&
+      (!newProducts[categoryId] || newProducts[categoryId].trim() === "")
+    ) {
+      setShowInput((prev) => ({
+        ...prev,
+        [categoryId]: false,
+      }))
+    }
+
+    if (e.key === "Enter") {
+      handleAddProduct(categoryId)
+    }
+  }
+
   if (loading) {
     return <ProductsSkeleton count={3} />
   }
@@ -139,9 +160,7 @@ export default function ProductsPage() {
           />
           <div className="flex flex-col gap-1.5 mb-2">
             {category.products.map((product) => (
-              <Button key={product.id} variant="secondary" size="sm">
-                {product.name}
-              </Button>
+              <ProductPopover key={product.id} product={product} />
             ))}
           </div>
           {showInput[category.id] && (
@@ -154,6 +173,7 @@ export default function ProductsPage() {
                 })
               }
               onAdd={() => handleAddProduct(category.id)}
+              onKeyDown={(e) => onProductKeyDown(e, category.id)}
             />
           )}
         </div>

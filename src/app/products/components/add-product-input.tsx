@@ -4,12 +4,14 @@ type AddProductInputProps = {
   value: string
   onChange: (value: string) => void
   onAdd: () => void
+  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
 }
 
 export function AddProductInput({
   value,
   onChange,
   onAdd,
+  onKeyDown,
 }: AddProductInputProps) {
   return (
     <div className="flex gap-2 mb-2">
@@ -19,9 +21,7 @@ export function AddProductInput({
         placeholder="Add product"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") onAdd()
-        }}
+        onKeyDown={onKeyDown}
         onBlur={onAdd}
         autoFocus
       />
