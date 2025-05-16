@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 
 import { postgresErrorHandler } from "@/lib/error-handler"
+import { isEmptyString } from "@/lib/utils"
 import {
   getProductCategories,
   type ProductCategory,
@@ -132,10 +133,7 @@ export default function ProductsPage() {
     categoryId: string,
   ) => {
     // Hides the input if esc button is pressed and product field is empty
-    if (
-      e.key === "Escape" &&
-      (!newProducts[categoryId] || newProducts[categoryId].trim() === "")
-    ) {
+    if (e.key === "Escape" && isEmptyString(newProducts[categoryId])) {
       setShowInput((prev) => ({
         ...prev,
         [categoryId]: false,

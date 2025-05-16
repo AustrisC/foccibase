@@ -9,6 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { isEmptyString } from "@/lib/utils"
 import { type Product } from "@/server/get-products"
 import { supabase } from "@/server/supabase-client"
 
@@ -46,6 +47,12 @@ export function ProductPopover({
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
   const saveProductTitle = async () => {
+    if (isEmptyString(editTitle)) {
+      // When trying to save empty title, resets it back to previous one
+      setEditTitle(product.name)
+      return
+    }
+
     if (editTitle !== product.name) {
       onTitleChangeAction(product.id, editTitle) // Optimistically updates parent state
       await supabase
