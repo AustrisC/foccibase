@@ -1,5 +1,6 @@
 "use client"
 
+import { TrashIcon } from "lucide-react"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -21,8 +22,10 @@ interface ProductPopoverProps {
 export function ProductPopover({
   product,
   onTitleChangeAction,
+  onRemoveAction,
 }: ProductPopoverProps & {
   onTitleChangeAction: (id: string, title: string) => void
+  onRemoveAction: (id: string) => void
 }) {
   const keyLabelMap: { [key: string]: string } = {
     package_price: "Cost / KG",
@@ -60,6 +63,12 @@ export function ProductPopover({
     }
   }
 
+  const handleRemove = async () => {
+    setOpen(false)
+    onRemoveAction(product.id)
+    await supabase.from("products").delete().eq("id", product.id)
+  }
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -73,31 +82,45 @@ export function ProductPopover({
         sideOffset={8}
         tabIndex={-1} // Removes focus when opened
       >
-        <div>
-          <ProductInputTitle
-            value={editTitle}
-            onChange={(e) => setEditTitle(e.target.value)}
-            saveProductTitle={saveProductTitle}
-          />
-          <div className="grid gap-2">
-            {Object.entries(filteredProduct).map(([key]) => {
-              return (
-                <ProductFieldInput
-                  key={key}
-                  id={key}
-                  label={keyLabelMap[key]}
-                  value={editValues[key] ?? ""}
-                  onChange={(val) =>
-                    setEditValues((prev) => ({
-                      ...prev,
-                      [key]: val,
-                    }))
-                  }
-                  onBlur={() => saveProductField(key)} // Saves product when leaving focus
-                />
-              )
-            })}
+        <div className="flex items-baseline">
+          <div className="flex-1">
+            <ProductInputTitle
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+              saveProductTitle={saveProductTitle}
+            />
           </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="ml-2 group"
+            onClick={handleRemove}
+            type="button"
+          >
+            <TrashIcon
+              className="w-5 h-5 text-muted-foreground group-hover:text-red-600 transition-colors"
+              aria-label="Remove product"
+            />
+          </Button>
+        </div>
+        <div>
+          {Object.entries(filteredProduct).map(([key]) => {
+            return (
+              <ProductFieldInput
+                key={key}
+                id={key}
+                label={keyLabelMap[key]}
+                value={editValues[key] ?? ""}
+                onChange={(val) =>
+                  setEditValues((prev) => ({
+                    ...prev,
+                    [key]: val,
+                  }))
+                }
+                onBlur={() => saveProductField(key)}
+              />
+            )
+          })}
         </div>
       </PopoverContent>
     </Popover>

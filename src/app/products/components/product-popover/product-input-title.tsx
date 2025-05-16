@@ -15,7 +15,7 @@ export function ProductInputTitle({
     <Input
       id="product-title"
       value={value}
-      className="font-bold text-3xl h-10 px-0 py-0 border-0 bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 focus-visible:border-0"
+      className="font-bold md:text-base px-0 pt-0 pb-1.5 border-0 bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 focus-visible:border-0"
       autoComplete="off"
       tabIndex={-1} // Removes focus when opened
       onChange={onChange}

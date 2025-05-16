@@ -147,10 +147,16 @@ export default function ProductsPage() {
     }
   }
 
+  // Optimistic product title change for instant UI updates
   const handleProductTitleChange = (productId: string, newTitle: string) => {
     setProducts((prev) =>
       prev.map((p) => (p.id === productId ? { ...p, name: newTitle } : p)),
     )
+  }
+
+  // Optimistic changes to instantly update UI
+  const handleRemoveProduct = (productId: string) => {
+    setProducts((prev) => prev.filter((p) => p.id !== productId))
   }
 
   if (loading) {
@@ -171,6 +177,7 @@ export default function ProductsPage() {
                 key={product.id}
                 product={product}
                 onTitleChangeAction={handleProductTitleChange}
+                onRemoveAction={handleRemoveProduct}
               />
             ))}
           </div>

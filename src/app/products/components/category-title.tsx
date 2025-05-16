@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react"
+import { PlusIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 
@@ -12,13 +12,13 @@ export function CategoryTitle({ name, onPlusClick }: CategoryTitleProps) {
     <div className="flex items-center justify-between group mb-4">
       <h2 className="text-2xl">{name}</h2>
       <Button
-        className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity rounded-full dark:hover:bg-transparent"
+        className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
         aria-label={`Add to ${name}`}
         variant="ghost"
         size="icon"
         onClick={onPlusClick}
       >
-        <Plus className="w-5 h-5" />
+        <PlusIcon className="w-5 h-5" />
       </Button>
     </div>
   )
