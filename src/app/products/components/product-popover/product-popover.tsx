@@ -1,7 +1,7 @@
 "use client"
 
 import { TrashIcon } from "lucide-react"
-import { useState } from "react"
+import { useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -43,6 +43,7 @@ export function ProductPopover({
   const [open, setOpen] = useState(false)
   const [editTitle, setEditTitle] = useState(product.name)
   const [editValues, setEditValues] = useState(filteredProduct)
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
   const saveProductTitle = async () => {
     if (editTitle !== product.name) {
@@ -104,23 +105,33 @@ export function ProductPopover({
           </Button>
         </div>
         <div>
-          {Object.entries(filteredProduct).map(([key]) => {
-            return (
-              <ProductFieldInput
-                key={key}
-                id={key}
-                label={keyLabelMap[key]}
-                value={editValues[key] ?? ""}
-                onChange={(val) =>
-                  setEditValues((prev) => ({
-                    ...prev,
-                    [key]: val,
-                  }))
+          {Object.keys(keyLabelMap).map((key, idx) => (
+            <ProductFieldInput
+              key={key}
+              id={key}
+              label={keyLabelMap[key]}
+              value={editValues[key] ?? ""}
+              onChange={(e) =>
+                setEditValues((prev) => ({
+                  ...prev,
+                  [key]: e.target.value,
+                }))
+              }
+              onBlur={() => saveProductField(key)}
+              ref={(el) => {
+                inputRefs.current[idx] = el
+              }}
+              onKeyDown={(e) => {
+                // Jumps to the next input when "Enter" is pressed
+                if (e.key === "Enter") {
+                  e.preventDefault()
+                  if (inputRefs.current[idx + 1]) {
+                    inputRefs.current[idx + 1]?.focus()
+                  }
                 }
-                onBlur={() => saveProductField(key)}
-              />
-            )
-          })}
+              }}
+            />
+          ))}
         </div>
       </PopoverContent>
     </Popover>

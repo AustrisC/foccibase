@@ -1,20 +1,17 @@
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-interface ProductFieldInputProps {
+interface ProductFieldInputProps extends React.ComponentProps<"input"> {
   id: string
   label: string
   value: string | number
-  onChange: (value: string) => void
-  onBlur: () => void
 }
 
 export function ProductFieldInput({
   id,
   label,
   value,
-  onChange,
-  onBlur,
+  ...props
 }: ProductFieldInputProps) {
   return (
     <div className="grid grid-cols-2 items-center gap-4">
@@ -35,8 +32,7 @@ export function ProductFieldInput({
           const val = input.value
           input.setSelectionRange(val.length, val.length)
         }}
-        onChange={(e) => onChange(e.target.value)}
-        onBlur={onBlur}
+        {...props}
       />
     </div>
   )
