@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 
-import { Button } from "@/components/ui/button"
 import { postgresErrorHandler } from "@/lib/error-handler"
 import {
   getProductCategories,
@@ -13,7 +12,7 @@ import { supabase } from "@/server/supabase-client"
 
 import { AddProductInput } from "./components/add-product-input"
 import { CategoryTitle } from "./components/category-title"
-import { ProductPopover } from "./components/product-popover"
+import { ProductPopover } from "./components/product-popover/product-popover"
 import { ProductsSkeleton } from "./components/products-skeleton"
 
 interface CategoryMap extends ProductCategory {
@@ -74,7 +73,9 @@ export default function ProductsPage() {
 
   const categoryMap = categories.map((category) => ({
     ...category,
-    products: products.filter((product) => product.category_id === category.id),
+    products: products
+      .filter((product) => product.category_id === category.id)
+      .sort((a, b) => a.name.localeCompare(b.name)), // Sort by name to avoid products switching order when updated, perhaps should use DB based indices
   }))
 
   const handleAddProduct = async (catId: string) => {
@@ -146,6 +147,12 @@ export default function ProductsPage() {
     }
   }
 
+  const handleProductTitleChange = (productId: string, newTitle: string) => {
+    setProducts((prev) =>
+      prev.map((p) => (p.id === productId ? { ...p, name: newTitle } : p)),
+    )
+  }
+
   if (loading) {
     return <ProductsSkeleton count={3} />
   }
@@ -160,7 +167,11 @@ export default function ProductsPage() {
           />
           <div className="flex flex-col gap-1.5 mb-2">
             {category.products.map((product) => (
-              <ProductPopover key={product.id} product={product} />
+              <ProductPopover
+                key={product.id}
+                product={product}
+                onTitleChangeAction={handleProductTitleChange}
+              />
             ))}
           </div>
           {showInput[category.id] && (
