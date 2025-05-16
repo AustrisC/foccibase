@@ -97,6 +97,7 @@ export function ProductPopover({
             className="ml-2 group"
             onClick={handleRemove}
             type="button"
+            tabIndex={-1} // Prevents keyboard focus
           >
             <TrashIcon
               className="w-5 h-5 text-muted-foreground group-hover:text-red-600 transition-colors"
